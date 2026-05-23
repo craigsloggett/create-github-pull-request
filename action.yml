@@ -1,25 +1,58 @@
 name: Create a GitHub Pull Request
 
-description: A composite action to create a GitHub pull request.
+description: Commit the current working tree changes to a new branch and open a pull request.
 
 inputs:
-  my-input:
-    description: This is my input, there is no other input like it.
+  branch:
+    description: The branch name to push the changes to.
+    required: true
+  base:
+    description: The base branch to open the pull request against.
     required: false
-    default: The default description.
+    default: main
+  title:
+    description: The pull request title.
+    required: true
+  body:
+    description: The pull request body.
+    required: false
+    default: ''
+  commit-message:
+    description: The commit message for the working tree changes.
+    required: true
+  github-token:
+    description: The token used to authenticate with the GitHub API to create the pull request.
+    required: true
+  git-user-name:
+    description: The git user.name used for the commit.
+    required: false
+    default: github-actions[bot]
+  git-user-email:
+    description: The git user.email used for the commit.
+    required: false
+    default: 41898282+github-actions[bot]@users.noreply.github.com
 
 outputs:
-  my-output:
-    description: The output this composite action produces.
-    value: steps.workflow-step.outputs.my-output
+  pull-request-url:
+    description: The URL of the created pull request, or empty if no pull request was created.
+    value: ${{ steps.create.outputs.pull-request-url }}
+  pull-request-number:
+    description: The number of the created pull request, or empty if no pull request was created.
+    value: ${{ steps.create.outputs.pull-request-number }}
 
 runs:
   using: composite
   steps:
-    - name: Workflow Step
-      id: workflow-step
-      run: |-
-        printf 'my-output=%s\n' "${MY_INPUT}" >> "${GITHUB_OUTPUT}"
+    - name: Create Pull Request
+      id: create
+      run: ${{ github.action_path }}/src/create_pr.sh
       shell: sh
       env:
-        MY_INPUT: inputs.my-input
+        BRANCH: ${{ inputs.branch }}
+        BASE: ${{ inputs.base }}
+        TITLE: ${{ inputs.title }}
+        BODY: ${{ inputs.body }}
+        COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        GIT_USER_NAME: ${{ inputs.git-user-name }}
+        GIT_USER_EMAIL: ${{ inputs.git-user-email }}
+        GH_TOKEN: ${{ inputs.github-token }}
