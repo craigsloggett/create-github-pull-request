@@ -1,6 +1,6 @@
-name: My Composite Action
+name: Create a GitHub Pull Request
 
-description: A composite action that ...
+description: A composite action to create a GitHub pull request.
 
 inputs:
   my-input:
