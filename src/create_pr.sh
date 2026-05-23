@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eu
+set -euf
 
 if [ -z "$(git status --porcelain)" ]; then
   printf 'No working tree changes. Skipping pull request.\n'
