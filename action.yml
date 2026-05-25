@@ -45,7 +45,7 @@ runs:
   steps:
     - name: Create Pull Request
       id: create
-      run: ${{ github.action_path }}/src/create_pr.sh
+      run: ${{ github.action_path }}/src/create_github_pull_request.sh
       shell: sh
       env:
         BRANCH: ${{ inputs.branch }}
