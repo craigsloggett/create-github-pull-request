@@ -69,7 +69,7 @@ In the minimal case shown, the action derives:
 | `pull-request-url`    | The URL of the created pull request. Empty if no pull request was created.    |
 | `pull-request-number` | The number of the created pull request. Empty if no pull request was created. |
 
-### Multi-line Commit Messages
+## Multi-line Commit Messages
 
 When `commit-message` spans multiple lines, the first line becomes the PR title and the remainder becomes the PR body. YAML's `|` block scalar is the cleanest way to write this:
 
