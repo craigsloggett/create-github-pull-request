@@ -49,6 +49,26 @@ In the minimal case shown, the action derives:
 - The base branch from the repository's default branch (`github.event.repository.default_branch`).
 - The authentication token from `github.token`, which the runner provides automatically when the workflow grants the permissions above.
 
+## Inputs
+
+| Input                      | Required | Default                                                 | Description                                         |
+| -------------------------- | -------- | ------------------------------------------------------- | --------------------------------------------------- |
+| `pull-request-title`       | No       | First line of `commit-message`                          | The pull request title.                             |
+| `pull-request-body`        | No       | Remainder of `commit-message` after the first line      | The pull request body.                              |
+| `pull-request-head-branch` | Yes      |                                                         | The branch name to push the changes to.             |
+| `pull-request-base-branch` | No       | Repository default branch                               | The base branch to open the pull request against.   |
+| `commit-message`           | Yes      |                                                         | The commit message for the working tree changes.    |
+| `git-user-name`            | No       | `github-actions[bot]`                                   | The git `user.name` used for the commit.            |
+| `git-user-email`           | No       | `41898282+github-actions[bot]@users.noreply.github.com` | The git `user.email` used for the commit.           |
+| `github-token`             | No       | `${{ github.token }}`                                   | The token used to authenticate with the GitHub API. |
+
+## Outputs
+
+| Output                | Description                                                                   |
+| --------------------- | ----------------------------------------------------------------------------- |
+| `pull-request-url`    | The URL of the created pull request. Empty if no pull request was created.    |
+| `pull-request-number` | The number of the created pull request. Empty if no pull request was created. |
+
 ### Multi-line Commit Messages
 
 When `commit-message` spans multiple lines, the first line becomes the PR title and the remainder becomes the PR body. YAML's `|` block scalar is the cleanest way to write this:
@@ -157,23 +177,3 @@ In this case, `github.event.pull_request.head.repo.full_name` is the `owner/repo
 In this case, `on: pull_request_target` runs in the base repository's context with full secrets, including secrets a fork would not normally see. If you combine it with `actions/checkout` configured to check out `github.event.pull_request.head.sha` (or `head.ref`), you are running untrusted fork code with trusted credentials.
 
 Don't do this unless you have a specific reason and you've stripped secrets from the environment first.
-
-## Inputs
-
-| Input                      | Required | Default                                                 | Description                                         |
-| -------------------------- | -------- | ------------------------------------------------------- | --------------------------------------------------- |
-| `pull-request-title`       | No       | First line of `commit-message`                          | The pull request title.                             |
-| `pull-request-body`        | No       | Remainder of `commit-message` after the first line      | The pull request body.                              |
-| `pull-request-head-branch` | Yes      |                                                         | The branch name to push the changes to.             |
-| `pull-request-base-branch` | No       | Repository default branch                               | The base branch to open the pull request against.   |
-| `commit-message`           | Yes      |                                                         | The commit message for the working tree changes.    |
-| `git-user-name`            | No       | `github-actions[bot]`                                   | The git `user.name` used for the commit.            |
-| `git-user-email`           | No       | `41898282+github-actions[bot]@users.noreply.github.com` | The git `user.email` used for the commit.           |
-| `github-token`             | No       | `${{ github.token }}`                                   | The token used to authenticate with the GitHub API. |
-
-## Outputs
-
-| Output                | Description                                                                   |
-| --------------------- | ----------------------------------------------------------------------------- |
-| `pull-request-url`    | The URL of the created pull request. Empty if no pull request was created.    |
-| `pull-request-number` | The number of the created pull request. Empty if no pull request was created. |
