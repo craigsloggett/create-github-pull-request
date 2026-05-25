@@ -128,7 +128,8 @@ The GitHub App needs `Contents: Read/Write` and `Pull Requests: Read/Write` perm
 
 ## Security
 
-If you provide a PAT or App token to this action so downstream workflows trigger on the PRs it opens, be aware that **those downstream workflows also have access to the elevated token** if they use the same secret.
+> [!CAUTION]
+> If you provide a PAT or App token to this action so downstream workflows trigger on the PRs it opens, be aware that **those downstream workflows also have access to the elevated token** if they use the same secret.
 
 ### Workflows Triggered on `pull_request`
 
@@ -146,7 +147,7 @@ jobs:
 In this case, `github.event.pull_request.head.repo.full_name` is the `owner/repo` of where the PR's branch lives. Comparing it to `github.repository` (the base repository) returns true only when the PR comes from a branch in the same repository. PRs from forks have a different `head.repo.full_name`, so the job is skipped.
 
 > [!NOTE]
-> This action itself only opens PRs from branches within the repository, so its PRs always pass this check. The guard exists to protect *any* workflow that might run privileged steps on a PR, not just this action's output.
+> This action itself only opens PRs from branches within the repository, so its PRs always pass this check.
 
 ### Workflows Triggered on `pull_request_target`
 
