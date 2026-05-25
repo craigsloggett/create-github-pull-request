@@ -126,21 +126,13 @@ The PAT needs `Contents: Read/Write` and `Pull Requests: Read/Write` on the targ
 
 The GitHub App needs `Contents: Read/Write` and `Pull Requests: Read/Write` permissions on the repositories it's installed in.
 
-### Security
+## Security
 
 If you provide a PAT or App token to this action so downstream workflows trigger on the PRs it opens, be aware that **those downstream workflows also have access to the elevated token** if they use the same secret.
 
-Two specific patterns to avoid:
+### Workflows Triggered on `pull_request`
 
-1. Workflows triggered on `pull_request_target` with `actions/checkout` configured to checkout the PR's head ref.
-
-In this case, `on: pull_request_target` runs in the base repo's context with full secrets, including secrets a fork would not normally see. If you combine it with `actions/checkout` configured to check out `github.event.pull_request.head.sha` (or `head.ref`), you are running untrusted fork code with trusted credentials.
-
-Don't do this unless you have a specific reason and you've stripped secrets from the environment first.
-
-2. Workflows triggered on `pull_request` without an owner check.
-
-If your workflow uses `on: pull_request` and one of your jobs needs the elevated token (e.g., to comment on the PR or update a status), guard the job so it only runs for PRs from the repository itself, not forks:
+If your workflow uses `on: pull_request` and one of your jobs needs the elevated token, guard the job so it only runs for PRs from the repository itself, not forks:
 
 ```yaml
 jobs:
@@ -151,10 +143,16 @@ jobs:
       # ... steps that use secrets
 ```
 
-In this case, `github.event.pull_request.head.repo.full_name` is the `owner/repo` of where the PR's branch lives. Comparing it to `github.repository` (the base repo) returns true only when the PR comes from a branch in the same repository. PRs from forks have a different `head.repo.full_name`, so the job is skipped.
+In this case, `github.event.pull_request.head.repo.full_name` is the `owner/repo` of where the PR's branch lives. Comparing it to `github.repository` (the base repository) returns true only when the PR comes from a branch in the same repository. PRs from forks have a different `head.repo.full_name`, so the job is skipped.
 
 > [!NOTE]
 > This action itself only opens PRs from branches within the repository, so its PRs always pass this check. The guard exists to protect *any* workflow that might run privileged steps on a PR, not just this action's output.
+
+### Workflows Triggered on `pull_request_target`
+
+In this case, `on: pull_request_target` runs in the base repository's context with full secrets, including secrets a fork would not normally see. If you combine it with `actions/checkout` configured to check out `github.event.pull_request.head.sha` (or `head.ref`), you are running untrusted fork code with trusted credentials.
+
+Don't do this unless you have a specific reason and you've stripped secrets from the environment first.
 
 ## Inputs
 
