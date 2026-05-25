@@ -75,7 +75,7 @@ This produces the following `gh pr create` flags:
 The commmit message used with `git commit -m` is preserved verbatim as the entire block above.
 
 > [!NOTE]
-> The blank line between the subject and body follows the standard Git convention but isn't required (this action handles both forms). If you need explicit control over the title or body independent of the commit message, pass pull-request-title and pull-request-body directly.
+> If you need explicit control over the title or body independent of the commit message, pass pull-request-title and pull-request-body directly.
 
 ## Triggering Downstream Workflows
 
