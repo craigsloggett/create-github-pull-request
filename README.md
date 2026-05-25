@@ -81,12 +81,15 @@ If you need explicit control over the title or body independent of the commit me
 
 PRs created by this action using the default `GITHUB_TOKEN` will **not** trigger `on: pull_request` or `on: push` workflows. This is [a deliberate GitHub safety measure](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow) to prevent recursive workflow runs.
 
-If you need CI to run on the opened PR, authenticate with one of the following options:
+If you need CI to run on the opened PR, the action needs to authenticate with credentials other than `GITHUB_TOKEN`. Two common options:
+
+- A fine-grained Personal Access Token (PAT)
+- A GitHub App installation token
 
 > [!CAUTION]
-> Both options below give downstream workflows access to the elevated token. See [Securing downstream workflows](#securing-downstream-workflows) for ways to mitigate this risk.
+> Whichever option you pick, the credential will be available to downstream workflows that can read its secret. Before deploying this pattern, read [Securing downstream workflows](#securing-downstream-workflows).
 
-### Authenticate with a Fine-grained Personal Access Token (PAT)
+### With a fine-grained Personal Access Token
 
 ```yaml
 - name: Checkout
@@ -98,13 +101,15 @@ If you need CI to run on the opened PR, authenticate with one of the following o
   uses: craigsloggett/create-github-pull-request@v1
   with:
     pull-request-head-branch: my-branch
-    commit-message: 'chore: update something'
+    commit-message: 'chore: Update something'
     github-token: ${{ secrets.GH_TOKEN }}
 ```
 
+Both `actions/checkout` and this action need the same token. `actions/checkout` uses it to configure git's credential helper, which is what `git push` later uses. If only one step has the elevated token, the push will be attributed to `GITHUB_TOKEN` and downstream workflows still won't trigger.
+
 The PAT needs `Contents: Read/Write` and `Pull Requests: Read/Write` on the target repository.
 
-### Authenticate with a GitHub App installation token
+### With a GitHub App installation token
 
 ```yaml
 - name: Get App token
@@ -123,7 +128,7 @@ The PAT needs `Contents: Read/Write` and `Pull Requests: Read/Write` on the targ
   uses: craigsloggett/create-github-pull-request@v1
   with:
     pull-request-head-branch: my-branch
-    commit-message: 'chore: update something'
+    commit-message: 'chore: Update something'
     github-token: ${{ steps.app-token.outputs.token }}
 ```
 
@@ -131,9 +136,14 @@ The GitHub App needs `Contents: Read/Write` and `Pull Requests: Read/Write` perm
 
 ## Securing downstream workflows
 
-### Workflows triggered on `pull_request`
+Once you've provided a PAT or App token via `secrets.*`, *any* workflow in the repository that can read that secret can use it (including workflows triggered by PRs from forks). This section describes two patterns that are routinely the source of credential leaks, and how to defend against them.
+
+### Guard privileged jobs on `pull_request`
 
 If your workflow uses `on: pull_request` and one of your jobs needs the elevated token, guard the job so it only runs for PRs from the repository itself, not forks:
+By default, workflows triggered by `on: pull_request` from a fork run with `secrets.*` set to empty and `GITHUB_TOKEN` restricted to read-only. So fork code can't read your PAT or App token *unless you wrote a job that explicitly uses one*.
+
+If for example, you have a job that comments on the PR using an elevated token, you can guard it so it only runs for PRs from inside the repository:
 
 ```yaml
 jobs:
@@ -144,16 +154,33 @@ jobs:
       # ... steps that use secrets
 ```
 
-In this case, `github.event.pull_request.head.repo.full_name` is the `owner/repo` of where the PR's branch lives. Comparing it to `github.repository` (the base repository) returns true only when the PR comes from a branch in the same repository. PRs from forks have a different `head.repo.full_name`, so the job is skipped.
+`github.event.pull_request.head.repo.full_name` is the `owner/repo` of where the PR's branch lives. Comparing it to `github.repository` (the base repository) returns `true` only when the PR comes from a branch in the same repository. PRs from forks have a different `head.repo.full_name`, so the guarded job is skipped.
 
 > [!NOTE]
 > This action itself only opens PRs from branches within the repository, so its PRs always pass this check.
 
-### Workflows triggered on `pull_request_target`
+### Don't run fork code under `pull_request_target`
 
-In this case, `on: pull_request_target` runs in the base repository's context with full secrets, including secrets a fork would not normally see. If you combine it with `actions/checkout` configured to check out `github.event.pull_request.head.sha` (or `head.ref`), you are running untrusted fork code with trusted credentials.
+`on: pull_request_target` runs in the base repository's context with full access to secrets (including ones a fork would not normally see). It's designed for trusted automation (labeling, commenting, running checks against the base) and explicitly *not* for executing PR content.
 
-Don't do this unless you have a specific reason and you've stripped secrets from the environment first.
+The dangerous pattern is combining `pull_request_target` with `actions/checkout` configured to check out the PR's head:
+
+```yaml
+on: pull_request_target
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}  # dangerous
+      - run: npm install && npm test
+```
+
+This runs arbitrary code from the fork (any install script, build hook, or test command can do anything) inside a context that has your PAT or App token in scope. A malicious PR exfiltrates the credential in one run.
+
+Don't combine these two unless you have a specific reason and have explicitly stripped secrets from the environment before checking out the PR's code.
 
 ## Inputs
 
