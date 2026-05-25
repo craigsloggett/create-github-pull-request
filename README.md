@@ -81,9 +81,9 @@ The commmit message used with `git commit -m` is preserved verbatim as the entir
 
 PRs created by this action using the default `GITHUB_TOKEN` will **not** trigger `on: pull_request` or `on: push` workflows. This is [a deliberate GitHub safety measure](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow) to prevent recursive workflow runs.
 
-If you need CI to run on the opened PR, authenticate with one of:
+If you need CI to run on the opened PR, authenticate with one of the following options:
 
-1. A fine-grained Personal Access Token (PAT):
+### Authenticate with A Fine-grained Personal Access Token (PAT)
 
 ```yaml
 - name: Checkout
@@ -99,9 +99,9 @@ If you need CI to run on the opened PR, authenticate with one of:
     github-token: ${{ secrets.GH_TOKEN }}
 ```
 
-The PAT needs `Contents: Read/Write` and `Pull Requests: Read/Write` on the target repo.
+The PAT needs `Contents: Read/Write` and `Pull Requests: Read/Write` on the target repository.
 
-2. A GitHub App installation token:
+### Authenticate with A GitHub App Installation Token
 
 ```yaml
 - name: Get App token
@@ -124,7 +124,7 @@ The PAT needs `Contents: Read/Write` and `Pull Requests: Read/Write` on the targ
     github-token: ${{ steps.app-token.outputs.token }}
 ```
 
-The App needs `Contents: Read/Write` and `Pull Requests: Read/Write` permissions on the repos it's installed in.
+The GitHub App needs `Contents: Read/Write` and `Pull Requests: Read/Write` permissions on the repositories it's installed in.
 
 ### Security
 
