@@ -75,7 +75,7 @@ This produces the following `gh pr create` flags:
 The commmit message used with `git commit -m` is preserved verbatim as the entire block above.
 
 > [!NOTE]
-> If you need explicit control over the title or body independent of the commit message, pass `pull-request-title` and `pull-request-body` directly to the action.
+> If you need explicit control over the title or body independent of the commit message, pass `pull-request-title` and `pull-request-body` directly to the action. See [Security](#security) for ways to mitigate this risk.
 
 ## Triggering Downstream Workflows
 
@@ -84,6 +84,9 @@ PRs created by this action using the default `GITHUB_TOKEN` will **not** trigger
 If you need CI to run on the opened PR, authenticate with one of the following options:
 
 ### Authenticate with A Fine-grained Personal Access Token (PAT)
+
+> [!CAUTION]
+> If you provide a PAT to this action so downstream workflows trigger on the PRs it opens, be aware that **those downstream workflows also have access to the token**. See [Security](#security) for ways to mitigate this risk.
 
 ```yaml
 - name: Checkout
@@ -102,6 +105,9 @@ If you need CI to run on the opened PR, authenticate with one of the following o
 The PAT needs `Contents: Read/Write` and `Pull Requests: Read/Write` on the target repository.
 
 ### Authenticate with A GitHub App Installation Token
+
+> [!CAUTION]
+> If you provide an App token to this action so downstream workflows trigger on the PRs it opens, be aware that **those downstream workflows also have access to the token**.
 
 ```yaml
 - name: Get App token
@@ -127,9 +133,6 @@ The PAT needs `Contents: Read/Write` and `Pull Requests: Read/Write` on the targ
 The GitHub App needs `Contents: Read/Write` and `Pull Requests: Read/Write` permissions on the repositories it's installed in.
 
 ## Security
-
-> [!CAUTION]
-> If you provide a PAT or App token to this action so downstream workflows trigger on the PRs it opens, be aware that **those downstream workflows also have access to the elevated token** if they use the same secret.
 
 ### Workflows Triggered on `pull_request`
 
