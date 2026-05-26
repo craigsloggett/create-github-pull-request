@@ -63,5 +63,6 @@ PULL_REQUEST_URL="$(
 } >>"${GITHUB_OUTPUT}"
 
 {
-  printf 'Pull request created: %s' "${PULL_REQUEST_URL}"
+  printf '### Pull Request Created'
+  printf '- URL: %s' "${PULL_REQUEST_URL}"
 } >>"${GITHUB_STEP_SUMMARY}"
