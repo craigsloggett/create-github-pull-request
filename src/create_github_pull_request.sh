@@ -3,7 +3,7 @@
 set -euf
 
 # Required user inputs.
-: "${COMMIT_MESSAGE:?COMMIT_MESSAGE is required}"
+: "${PULL_REQUEST_TITLE:?PULL_REQUEST_TITLE is required}"
 : "${PULL_REQUEST_HEAD_BRANCH:?PULL_REQUEST_HEAD_BRANCH is required}"
 : "${PULL_REQUEST_BASE_BRANCH:?PULL_REQUEST_BASE_BRANCH is required}"
 : "${GIT_USER_NAME:?GIT_USER_NAME is required}"
@@ -22,16 +22,12 @@ for utility in jq gh; do
 done
 
 # Derived defaults.
-if [ -z "${PULL_REQUEST_TITLE:-}" ]; then
-  PULL_REQUEST_TITLE="$(printf '%s' "${COMMIT_MESSAGE}" | head -n 1)"
-fi
-
-if [ -z "${PULL_REQUEST_BODY:-}" ]; then
-  PULL_REQUEST_BODY="$(
-    printf '%s' "${COMMIT_MESSAGE}" |
-      tail -n +2 |
-      sed '/./,$!d'
-  )"
+if [ -z "${COMMIT_MESSAGE:-}" ]; then
+  if [ -n "${PULL_REQUEST_BODY:-}" ]; then
+    COMMIT_MESSAGE="$(printf '%s\n\n%s\n' "${PULL_REQUEST_TITLE}" "${PULL_REQUEST_BODY}")"
+  else
+    COMMIT_MESSAGE="${PULL_REQUEST_TITLE}"
+  fi
 fi
 
 if [ -z "$(git status --porcelain)" ]; then

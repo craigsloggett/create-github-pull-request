@@ -4,11 +4,10 @@ description: Commit the current working tree changes to a new branch and open a 
 
 inputs:
   pull-request-title:
-    description: The pull request title. Defaults to the first line of the commit message.
-    required: false
-    default: ''
+    description: The pull request title. Used as the commit message subject line.
+    required: true
   pull-request-body:
-    description: The pull request body. Defaults to everything after the first line of the commit message.
+    description: The pull request body. Used as the commit message body, separated from the subject by a blank line.
     required: false
     default: ''
   pull-request-head-branch:
@@ -19,8 +18,9 @@ inputs:
     required: false
     default: ${{ github.event.repository.default_branch }}
   commit-message:
-    description: The commit message for the working tree changes.
-    required: true
+    description: The commit message for the working tree changes. Defaults to the pull request title and body.
+    required: false
+    default: ''
   git-user-name:
     description: The git user.name used for the commit.
     required: false
