@@ -57,5 +57,11 @@ PULL_REQUEST_URL="$(
     --head "${PULL_REQUEST_HEAD_BRANCH}"
 )"
 
-printf 'url=%s\n' "${PULL_REQUEST_URL}" >>"${GITHUB_OUTPUT}"
-printf 'number=%s\n' "${PULL_REQUEST_URL##*/}" >>"${GITHUB_OUTPUT}"
+{
+  printf 'url=%s\n' "${PULL_REQUEST_URL}"
+  printf 'number=%s\n' "${PULL_REQUEST_URL##*/}"
+} >>"${GITHUB_OUTPUT}"
+
+{
+  printf 'Pull request created: %s' "${PULL_REQUEST_URL}"
+} >>"${GITHUB_STEP_SUMMARY}"
