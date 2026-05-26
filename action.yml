@@ -3,24 +3,24 @@ name: Create a GitHub Pull Request
 description: Commit the current working tree changes to a new branch and open a pull request.
 
 inputs:
-  pull-request-title:
-    description: The pull request title. Defaults to the first line of the commit message.
+  title:
+    description: The pull request title. Used as the commit message subject line.
+    required: true
+  body:
+    description: The pull request body. Used as the commit message body, separated from the subject by a blank line.
     required: false
     default: ''
-  pull-request-body:
-    description: The pull request body. Defaults to everything after the first line of the commit message.
-    required: false
-    default: ''
-  pull-request-head-branch:
+  branch:
     description: The branch name to push the changes to.
     required: true
-  pull-request-base-branch:
+  base-branch:
     description: The base branch to open the pull request against.
     required: false
     default: ${{ github.event.repository.default_branch }}
   commit-message:
-    description: The commit message for the working tree changes.
-    required: true
+    description: The commit message for the working tree changes. Defaults to the pull request title and body.
+    required: false
+    default: ''
   git-user-name:
     description: The git user.name used for the commit.
     required: false
@@ -29,32 +29,32 @@ inputs:
     description: The git user.email used for the commit.
     required: false
     default: 41898282+github-actions[bot]@users.noreply.github.com
-  github-token:
-    description: The token used to authenticate with the GitHub API to create the pull request.
+  token:
+    description: The token used to authenticate to GitHub to create the pull request.
     required: false
     default: ${{ github.token }}
 
 outputs:
-  pull-request-url:
+  url:
     description: The URL of the created pull request. Empty if no pull request was created.
-    value: ${{ steps.create-pull-request.outputs.pull-request-url }}
-  pull-request-number:
+    value: ${{ steps.create-github-pull-request.outputs.url }}
+  number:
     description: The number of the created pull request. Empty if no pull request was created.
-    value: ${{ steps.create-pull-request.outputs.pull-request-number }}
+    value: ${{ steps.create-github-pull-request.outputs.number }}
 
 runs:
   using: composite
   steps:
-    - name: Create Pull Request
-      id: create-pull-request
+    - name: Create GitHub Pull Request
+      id: create-github-pull-request
       run: ${{ github.action_path }}/src/create_github_pull_request.sh
       shell: sh
       env:
-        PULL_REQUEST_TITLE: ${{ inputs.pull-request-title }}
-        PULL_REQUEST_BODY: ${{ inputs.pull-request-body }}
-        PULL_REQUEST_HEAD_BRANCH: ${{ inputs.pull-request-head-branch }}
-        PULL_REQUEST_BASE_BRANCH: ${{ inputs.pull-request-base-branch }}
+        PULL_REQUEST_TITLE: ${{ inputs.title }}
+        PULL_REQUEST_BODY: ${{ inputs.body }}
+        PULL_REQUEST_HEAD_BRANCH: ${{ inputs.branch }}
+        PULL_REQUEST_BASE_BRANCH: ${{ inputs.base-branch }}
         COMMIT_MESSAGE: ${{ inputs.commit-message }}
         GIT_USER_NAME: ${{ inputs.git-user-name }}
         GIT_USER_EMAIL: ${{ inputs.git-user-email }}
-        GH_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.token }}
