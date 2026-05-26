@@ -30,7 +30,7 @@ inputs:
     required: false
     default: 41898282+github-actions[bot]@users.noreply.github.com
   token:
-    description: The token used to authenticate with the GitHub API to create the pull request.
+    description: The token used to authenticate to GitHub to create the pull request.
     required: false
     default: ${{ github.token }}
 
