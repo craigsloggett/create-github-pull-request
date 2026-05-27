@@ -60,4 +60,5 @@ PULL_REQUEST_URL="$(
 {
   printf 'url=%s\n' "${PULL_REQUEST_URL}"
   printf 'number=%s\n' "${PULL_REQUEST_URL##*/}"
+  printf 'branch=%s\n' "${PULL_REQUEST_HEAD_BRANCH}"
 } >>"${GITHUB_OUTPUT}"
