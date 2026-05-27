@@ -192,7 +192,8 @@ Don't combine these two unless you have a specific reason and have explicitly st
 
 ## Outputs
 
-| Output   | Description                                                                   |
-| -------- | ----------------------------------------------------------------------------- |
-| `url`    | The URL of the created pull request. Empty if no pull request was created.    |
-| `number` | The number of the created pull request. Empty if no pull request was created. |
+| Output   | Description                                                                       |
+| -------- | --------------------------------------------------------------------------------- |
+| `url`    | The URL of the created pull request. Empty if no pull request was created.        |
+| `number` | The number of the created pull request. Empty if no pull request was created.     |
+| `branch` | The head branch the pull request was created from. Empty if none was created.     |
